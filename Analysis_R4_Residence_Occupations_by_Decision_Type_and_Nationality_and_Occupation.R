@@ -2,6 +2,7 @@
 library(tidyverse)
 library(stringi)
 library(ggpubr)
+library(gghighlight)
 Imm = read.csv("C:/Users/kfur006/Desktop/Random Data/Immigration Data Explorer/R4_Residence_Occupations_by_Decision_Type_and_Nationality_and_Occupation.csv") %>% 
   mutate(#Nationality = factor(Nationality),
     Occupation = factor(Occupation, level = sort(unique(Occupation))),
@@ -35,6 +36,7 @@ ImmTheme = theme(text = element_text(size = TextSize, face = "bold"),
                  plot.title = element_text(size = TextSize, face = "bold"),
                  plot.subtitle = element_text(size = TextSize, face = "bold"))
 
+## Approve Rate
 ImmData %>% 
   #filter(Occupation == "Chef") %>% 
   group_by(Calendar.Year, Decision.Type) %>% 
@@ -52,6 +54,22 @@ ImmData %>%
   theme_bw() +
   ImmTheme
 
+## Overall App Number
+ImmData %>% 
+  group_by(Calendar.Year,
+  ) %>% 
+  summarise(Total.App2 = sum(Count)) %>% 
+  ggplot(., aes(x = Calendar.Year, y = Total.App2)) +
+  geom_line(size = 2) +
+  scale_x_continuous(breaks = seq(min(ImmData$Calendar.Year), max(ImmData$Calendar.Year), by = 1)) +
+  labs(title = "Number of Residence Application",
+       x = "",
+       y = "Number of Applications",
+       caption = "Data: Immigration NZ") +
+  theme_bw() +
+  ImmTheme
+
+## Overall App Number Japan
 ImmData %>% filter(Nationality == "Japan") %>% 
   group_by(Calendar.Year,
            Nationality
@@ -69,19 +87,7 @@ ImmData %>% filter(Nationality == "Japan") %>%
 
 
 
-ImmData %>% 
-  group_by(Calendar.Year,
-  ) %>% 
-  summarise(Total.App2 = sum(Count)) %>% 
-  ggplot(., aes(x = Calendar.Year, y = Total.App2)) +
-  geom_line(size = 2) +
-  scale_x_continuous(breaks = seq(min(ImmData$Calendar.Year), max(ImmData$Calendar.Year), by = 1)) +
-  labs(title = "Number of Residence Application",
-       x = "",
-       y = "Number of Applications",
-       caption = "Data: Immigration NZ") +
-  theme_bw() +
-  ImmTheme
+
 
 ggarrange(ImmData %>% 
             group_by(Calendar.Year,
@@ -112,3 +118,40 @@ ggarrange(ImmData %>%
             ImmTheme,
           ncol = 1)
 
+
+
+## Overall App Number by Occupation (Excl. Not Recorded)
+AnnX <- median(ImmData$Calendar.Year)
+#AnnY <- mean(ImmData$Total.App)
+ImmData %>% 
+  filter(!Occupation %in% c("(not recorded)", "Not Stated")) %>% 
+  group_by(Calendar.Year, Occupation
+  ) %>% 
+  summarise(Total.App2 = sum(Count)) %>%
+  gghighlight_line(., aes(x = Calendar.Year, y = Total.App2, colour = Occupation), predicate = max(Total.App2), 
+                   max_highlight = 10, size = 4) +
+  scale_x_continuous(breaks = seq(min(ImmData$Calendar.Year), max(ImmData$Calendar.Year), by = 1)) +
+  labs(title = "Number of Residence Application",
+       x = "",
+       y = "Number of Applications",
+       caption = "Data: Immigration NZ") +
+  theme_bw() +
+  ImmTheme +
+  annotate("text", x = AnnX, y = 500, label = "Power In Numbers", size = 15, colour = "grey")
+
+
+## Overall App Number
+ImmData %>%
+  filter(str_detect(Occupation, "Early")) %>% 
+  group_by(Calendar.Year, Occupation) %>% 
+  summarise(Total.App2 = sum(Count)) %>%
+  ggplot(., aes(x = Calendar.Year, y = Total.App2)) +
+  geom_line(size = 2) +
+  ylim(0, 200) +
+  scale_x_continuous(breaks = seq(min(ImmData$Calendar.Year), max(ImmData$Calendar.Year), by = 1)) +
+  labs(title = "Number of Residence Application",
+       x = "",
+       y = "Number of Applications",
+       caption = "Data: Immigration NZ") +
+  theme_bw() +
+  ImmTheme
