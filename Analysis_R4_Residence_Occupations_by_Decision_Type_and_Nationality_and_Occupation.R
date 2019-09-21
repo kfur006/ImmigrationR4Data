@@ -3,7 +3,8 @@ library(tidyverse)
 library(stringi)
 library(ggpubr)
 library(gghighlight)
-Imm = read.csv("C:/Users/kfur006/Desktop/Random Data/Immigration Data Explorer/R4_Residence_Occupations_by_Decision_Type_and_Nationality_and_Occupation.csv") %>% 
+Imm = read.csv(#"C:/Users/kfur006/Desktop/Random Data/Immigration Data Explorer/R4_Residence_Occupations_by_Decision_Type_and_Nationality_and_Occupation.csv"
+               "C:/Users/key_a/Documents/GitHub/ImmigrationR4Data/R4_Residence_Occupations_by_Decision_Type_and_Nationality_and_Occupation.csv") %>% 
   mutate(#Nationality = factor(Nationality),
     Occupation = factor(Occupation, level = sort(unique(Occupation))),
     Calendar.Year = as.numeric(stri_trim(gsub("[([:alpha:]+[:punct:]+)]", "", Calendar.Year)))
@@ -140,7 +141,7 @@ ImmData %>%
   annotate("text", x = AnnX, y = 500, label = "Power In Numbers", size = 15, colour = "grey")
 
 
-## Overall App Number
+## Overall App Number Early Childhood
 ImmData %>%
   filter(str_detect(Occupation, "Early")) %>% 
   group_by(Calendar.Year, Occupation) %>% 
@@ -149,9 +150,44 @@ ImmData %>%
   geom_line(size = 2) +
   ylim(0, 200) +
   scale_x_continuous(breaks = seq(min(ImmData$Calendar.Year), max(ImmData$Calendar.Year), by = 1)) +
-  labs(title = "Number of Residence Application",
+  labs(title = "Number of Residence Application Early Childhood",
        x = "",
        y = "Number of Applications",
        caption = "Data: Immigration NZ") +
   theme_bw() +
   ImmTheme
+
+
+
+## Approve Rate Early Childhood
+ImmData %>% 
+  filter(str_detect(Occupation, "Early")) %>% 
+  group_by(Calendar.Year, Decision.Type) %>% 
+  summarise(Count2 = sum(Count)) %>% 
+  spread(., Decision.Type, Count2) %>% 
+  mutate(Rate = Approved/(Approved+Declined)) %>% 
+  ggplot(., aes(x = Calendar.Year, y = Rate*100)) +
+  geom_line(size = 2) +
+  ylim(0, 100) +
+  scale_x_continuous(breaks = seq(min(ImmData$Calendar.Year), max(ImmData$Calendar.Year), by = 1)) +
+  labs(title = "Approve Rate of Early Childhood",
+       x = "",
+       y = "Approve Rate",
+       caption = "Data: Immigration NZ") +
+  theme_bw() +
+  ImmTheme +
+  geom_hline(yintercept  = ImmData %>% 
+               #filter(Occupation == "Chef") %>% 
+               group_by(Calendar.Year, Decision.Type) %>% 
+               summarise(Count2 = sum(Count)) %>% 
+               spread(., Decision.Type, Count2) %>% 
+               mutate(Rate = Approved/(Approved+Declined)) %>%
+               select(-c("Approved", "Declined")) %>%
+               ungroup() %>% 
+               summarise(RateAve = mean(Rate)) %>% 
+               as.numeric()*100,
+             colour = "red",
+             size = 2,
+             linetype = "dashed")
+
+
