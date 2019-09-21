@@ -191,3 +191,61 @@ ImmData %>%
              linetype = "dashed")
 
 
+
+
+
+## Overall App Number Early Childhood
+Occ <- 'Hotel|Motel'
+Occup <- as.character(ImmData$Occupation[which(str_detect(unique(ImmData$Occupation), Occ))][1])
+
+ImmData %>%
+  filter(str_detect(Occupation, Occup)) %>% 
+  group_by(Calendar.Year, Occupation) %>% 
+  summarise(Total.App2 = sum(Count)) %>%
+  ggplot(., aes(x = Calendar.Year, y = Total.App2)) +
+  geom_line(size = 2) +
+  ylim(0, 200) +
+  scale_x_continuous(breaks = seq(min(ImmData$Calendar.Year), max(ImmData$Calendar.Year), by = 1)) +
+  labs(title = paste("Number of Residence Application of", Occup),
+       x = "",
+       y = "Number of Applications",
+       caption = "Data: Immigration NZ") +
+  theme_bw() +
+  ImmTheme
+
+
+
+## Approve Rate
+
+ImmData %>% 
+  filter(str_detect(Occupation, Occup)) %>% 
+  group_by(Calendar.Year, Decision.Type) %>% 
+  summarise(Count2 = sum(Count)) %>% 
+  spread(., Decision.Type, Count2) %>% 
+  mutate(Rate = Approved/(Approved+Declined)) %>% 
+  ggplot(., aes(x = Calendar.Year, y = Rate*100)) +
+  geom_line(size = 2) +
+  ylim(0, 100) +
+  scale_x_continuous(breaks = seq(min(ImmData$Calendar.Year), max(ImmData$Calendar.Year), by = 1)) +
+  labs(title = paste("Approve Rate of",  Occup),
+       x = "",
+       y = "Approve Rate",
+       caption = "Data: Immigration NZ") +
+  theme_bw() +
+  ImmTheme +
+  geom_hline(yintercept  = ImmData %>% 
+               #filter(Occupation == "Chef") %>% 
+               group_by(Calendar.Year, Decision.Type) %>% 
+               summarise(Count2 = sum(Count)) %>% 
+               spread(., Decision.Type, Count2) %>% 
+               mutate(Rate = Approved/(Approved+Declined)) %>%
+               select(-c("Approved", "Declined")) %>%
+               ungroup() %>% 
+               summarise(RateAve = mean(Rate)) %>% 
+               as.numeric()*100,
+             colour = "red",
+             size = 2,
+             linetype = "dashed")
+
+
+
