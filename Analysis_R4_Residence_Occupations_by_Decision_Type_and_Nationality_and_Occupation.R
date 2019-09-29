@@ -248,4 +248,7 @@ ImmData %>%
              linetype = "dashed")
 
 
+## Work
+load("E:/Analysis/Immigration/rda/W3_work_occupations.rda")
+
 
