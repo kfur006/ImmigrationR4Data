@@ -142,6 +142,28 @@ ImmData %>%
   annotate("text", x = AnnX, y = 500, label = "Power In Numbers", size = 15, colour = "grey")
 
 
+## Japanese App Number by Occupation (Excl. Not Recorded)
+AnnX <- median(ImmData$Calendar.Year)
+#AnnY <- mean(ImmData$Total.App)
+ImmData %>% 
+  filter(!Occupation %in% c("(not recorded)", "Not Stated"),
+         Nationality == "Japan",
+         Calendar.Year != 2009) %>% 
+  group_by(Calendar.Year, Occupation
+  ) %>% 
+  summarise(Total.App2 = sum(Count)) %>%
+  gghighlight_line(., aes(x = Calendar.Year, y = Total.App2, colour = Occupation), predicate = max(Total.App2), 
+                   max_highlight = 15, size = 4) +
+  scale_x_continuous(breaks = seq(min(ImmData$Calendar.Year), max(ImmData$Calendar.Year), by = 1)) +
+  labs(title = "Number of Application",
+       x = "",
+       y = "Number of Applications",
+       caption = "Data: Immigration NZ") +
+  theme_bw() +
+  ImmTheme +
+  annotate("text", x = AnnX, y = 500, label = "Power In Numbers", size = 15, colour = "grey")
+
+
 ## Overall App Number Early Childhood
 ImmData %>%
   filter(str_detect(Occupation, "Early")) %>% 
@@ -253,5 +275,72 @@ ImmData %>%
 load("E:/Analysis/Immigration/rda/W3_work_occupations.rda")
 
 
+
+
+## Work Visa Analysis
+library(tidyverse)
+library(stringi)
+library(ggpubr)
+library(gghighlight)
+load("E:/Analysis/Immigration/rda/W3_work_occupations.rda")
+
+head(W3_work_occupations)
+str(W3_work_occupations)
+
+W3_work_occupations %>% 
+  filter(Nationality == "Argentina",
+         Date == "2008-07-31",
+         Occupation == "Chef",
+         `Application Substream` == "Skilled Work")
+
+W3_work_occupations %>% 
+  filter(`Application Substream` == "Skilled Work") %>% 
+  select("Date", 
+         "Decision Type",
+         "Nationality",
+         "Occupation Skill Level",
+         "Occupation",
+         #"Region",
+         "Count") %>% 
+  group_by(Date, 
+           `Decision Type`,
+           Nationality,
+           `Occupation Skill Level`,
+           Occupation,
+           #Region,
+           Count) %>% 
+  summarise(n = sum(Count)) %>% 
+  filter(n != 0,
+         Nationality == "Japan") %>% 
+  #ggplot(data = ., aes(x = Date, y = Count, colour = Occupation)) +
+  gghighlight_line(., aes(x = Date, y = n, colour = Occupation), predicate = max(n), 
+                   max_highlight = 10, size = 2)
+
+
+
+
+test <- W3_work_occupations %>% 
+  filter(`Application Substream` == "Skilled Work",
+         Nationality == "Japan") %>% 
+  select("Date", 
+         #"Decision Type",
+         "Nationality",
+         #"Occupation Skill Level",
+         "Occupation",
+         #"Region",
+         "Count") %>% 
+  group_by(Date, 
+           #`Decision Type`,
+           Nationality,
+           #`Occupation Skill Level`,
+           Occupation,
+           #Region
+  ) %>% 
+  summarise(n = sum(Count))
+
+test %>% 
+  filter(Nationality == "Japan") %>% 
+  gghighlight_line(., aes(x = Date, y = n, colour = Occupation), predicate = max(n), 
+                   max_highlight = 10, size = 2)
 
 
