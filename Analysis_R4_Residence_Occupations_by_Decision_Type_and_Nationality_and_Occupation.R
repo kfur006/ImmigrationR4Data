@@ -4,7 +4,8 @@ library(stringi)
 library(ggpubr)
 library(gghighlight)
 Imm = read.csv(#"C:/Users/kfur006/Desktop/Random Data/Immigration Data Explorer/R4_Residence_Occupations_by_Decision_Type_and_Nationality_and_Occupation.csv"
-               "C:/Users/key_a/Documents/GitHub/ImmigrationR4Data/R4_Residence_Occupations_by_Decision_Type_and_Nationality_and_Occupation.csv") %>% 
+               #"C:/Users/key_a/Documents/GitHub/ImmigrationR4Data/R4_Residence_Occupations_by_Decision_Type_and_Nationality_and_Occupation.csv",
+               "E:/Analysis/Immigration/W3_Work_Occupations_by_Decision_Type_and_Nationality_and_Occupation.csv") %>% 
   mutate(#Nationality = factor(Nationality),
     Occupation = factor(Occupation, level = sort(unique(Occupation))),
     Calendar.Year = as.numeric(stri_trim(gsub("[([:alpha:]+[:punct:]+)]", "", Calendar.Year)))
@@ -250,5 +251,7 @@ ImmData %>%
 
 ## Work
 load("E:/Analysis/Immigration/rda/W3_work_occupations.rda")
+
+
 
 
